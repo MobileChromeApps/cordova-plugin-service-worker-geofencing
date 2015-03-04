@@ -19,40 +19,72 @@
 
 #import <Cordova/CDV.h>
 #import "CDVGeofencing.h"
+#import <JavaScriptCore/JavaScriptCore.h>
 
 @implementation CDVGeofencing
 
--(void)setupLocationManager:(CDVInvokedUrlCommand*)command
+@synthesize regionList;
+@synthesize serviceWorker;
+
+- (void)setupLocationManager:(CDVInvokedUrlCommand*)command
 {
     self.locationManager = [[CLLocationManager alloc] init];
     self.locationManager.desiredAccuracy = kCLLocationAccuracyBest; //TODO: Allow plugin user to set desired accuracy through javasript
     self.locationManager.delegate = self;
     [self.locationManager requestAlwaysAuthorization];
-    [self.locationManager requestWhenInUseAuthorization];
     [self.locationManager startUpdatingLocation];
+    self.serviceWorker = [(CDVViewController*)self.viewController getCommandInstance:@"ServiceWorker"];
+    [self setupUnregister];
 }
 
--(void)registerRegion:(CDVInvokedUrlCommand*)command
+- (void)setupUnregister
+{
+    //create weak reference to self in order to prevent retain cycle in block
+    __weak CDVGeofencing* weakSelf = self;
+    
+    // Set up service worker unregister event
+    serviceWorker.context[@"unregisterGeofence"] = ^(JSValue *regionId) {
+        NSLog(@"Unregistering Geofence");
+        [weakSelf unregisterRegionById:[regionId toString]];
+    };
+}
+
+- (void)unregisterRegionById:(NSString *)identifier
+{
+    CLRegion *region;
+    for (region in [self.locationManager monitoredRegions]) {
+        if ([region.identifier isEqualToString:identifier]) {
+            [self.locationManager stopMonitoringForRegion:region];
+            [self.regionList removeObjectForKey:identifier];
+        }
+    }
+}
+
+- (void)registerRegion:(CDVInvokedUrlCommand*)command
 {
     if ([CLLocationManager locationServicesEnabled]) {
         if([CLLocationManager regionMonitoringAvailable])
         {
-            if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorized) {
-                NSLog(@"Authorized");
+            if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedAlways) {
+                NSString *id = [self uuid];
+                NSDictionary *region = [command argumentAtIndex:0];
+                CLLocationCoordinate2D location;
+                location.latitude = [[region valueForKey:@"latitude"] doubleValue];
+                location.longitude = [[region valueForKey:@"longitude"] doubleValue];
+                [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:id]];
+                
+                // Store a map of id's to names
+                if (self.regionList == nil) {
+                    self.regionList = [NSMutableDictionary dictionaryWithObject:[region valueForKey:@"name"] forKey:id];
+                } else {
+                    [self.regionList setObject:[region valueForKey:@"name"] forKey:id];
+                }
+                CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:id];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+            } else {
+                NSLog(@"PermissionDeniedError");
+                //TODO: Send display an alert requesting user to change settings
             }
-            if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusDenied) {
-                NSLog(@"Denied");
-            }
-            if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusNotDetermined) {
-                NSLog(@"Undetermined Auth Status");
-            }
-            NSDictionary *region = [command argumentAtIndex:0];
-            CLLocationCoordinate2D location;
-            location.latitude = [[region valueForKey:@"latitude"] doubleValue];
-            location.longitude = [[region valueForKey:@"longitude"] doubleValue];
-            [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:[region valueForKey:@"id"]]];
-            CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         } else {
             NSLog(@"Region monitoring is unavailable");
             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"This device does not support region monitoring."];
@@ -65,6 +97,37 @@
     }
 }
 
+- (void)getRegistration:(CDVInvokedUrlCommand*)command
+{
+    NSString *id = [command argumentAtIndex:0];
+    CLCircularRegion *region;
+    NSDictionary *response, *geofencingRegion;
+    for (region in [self.locationManager monitoredRegions]) {
+        if ([region.identifier isEqualToString:id]) {
+            geofencingRegion = @{ @"name"       : [regionList objectForKey:region.identifier],
+                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
+                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
+                                  @"radius"     : [NSNumber numberWithDouble:region.radius]
+                                 };
+            response = @{ @"id"     : region.identifier,
+                          @"region" : geofencingRegion
+                         };
+        }
+    }
+    if (response == nil) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"NotFoundError"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+- (void)getRegistrations:(CDVInvokedUrlCommand*)command
+{
+    
+}
+
 -(void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region {
     NSLog(@"Started monitoring for %@", region.identifier);
 }
@@ -75,6 +138,19 @@
 
 -(void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region {
     NSLog(@"Exited region %@",region.identifier);
+}
+
+-(void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    NSLog(@"Authorization status has changed!");
+}
+
+//Helper function for generating unique ID's for the regions
+- (NSString *)uuid
+{
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    CFStringRef uuidString = CFUUIDCreateString(NULL, uuid);
+    CFRelease(uuid);
+    return (__bridge_transfer NSString *)uuidString;
 }
 
 @end
