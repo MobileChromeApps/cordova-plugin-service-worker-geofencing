@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+	   id="org.apache.cordova.geofencing"
+      version="0.0.1-dev">
+    <name>Geofencing</name>
+    <description>Geofencing plugin for cordova service worker</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,geofencing</keywords>
+
+    <dependency id="org.apache.cordova.serviceworker" url="https://github.com/mwoghiren/cordova-plugin-serviceworker.git" />
+
+    <js-module src="www/LocationManager.js" name="LocationManager">
+	<clobbers target="LocationManager" />
+    </js-module>
+    <js-module src="www/Region.js" name="Region">
+	<clobbers target="Region" />
+    </js-module>
+
+    <asset src="www/sw_assets/locationevent.js" target="sw_assets/locationevent.js" />    
+
+    <platform name="ios">
+	<config-file target="config.xml" parent="/*">
+	    <feature name="Geofencing">
+		<param name="ios-package" value="CDVGeofencing" />
+	    </feature>
+	</config-file>
+	<!-- The following should write into the info.plist and enable Location -->
+	<config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
+	    <string>Use location for geofencing</string>
+	</config-file>
+	<config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+	    <string>This app will wake up to tell you when you are at certain locations.</string>
+	</config-file>
+	<header-file src="src/ios/CDVGeofencing.h" />
+	<source-file src="src/ios/CDVGeofencing.m" />
+	<framework src="CoreLocation.framework" />
+    </platform>
+</plugin>
