@@ -12,4 +12,17 @@ function GeofenceRegistration(id, name, lat, lon, radius) {
     }
 };
 
+GeofenceRegistration.prototype.unregister = function() {
+    var scopeId = this.id;
+    return new Promise(function(resolve, reject) {
+	var success = function() {
+	    resolve();
+	};
+	var failure = function(err) {
+	    reject();
+	};
+	exec(success, failure, "Geofencing", "unregister", [scopeId]);
+    });
+};
+
 module.exports = GeofenceRegistration;

@@ -44,19 +44,33 @@
     
     // Set up service worker unregister event
     serviceWorker.context[@"unregisterGeofence"] = ^(JSValue *regionId) {
-        NSLog(@"Unregistering Geofence");
         [weakSelf unregisterRegionById:[regionId toString]];
     };
 }
 
-- (void)unregisterRegionById:(NSString *)identifier
+- (BOOL)unregisterRegionById:(NSString *)identifier
 {
+    BOOL didRemove = NO;
     CLRegion *region;
     for (region in [self.locationManager monitoredRegions]) {
         if ([region.identifier isEqualToString:identifier]) {
             [self.locationManager stopMonitoringForRegion:region];
             [self.regionList removeObjectForKey:identifier];
+            NSLog(@"Unregistering Geofence %@", identifier);
+            didRemove = YES;
         }
+    }
+    return didRemove;
+}
+
+- (void)unregister:(CDVInvokedUrlCommand*)command
+{
+    if ([self unregisterRegionById:[command argumentAtIndex:0]]) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
 }
 
