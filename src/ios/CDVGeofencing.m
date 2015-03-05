@@ -21,9 +21,11 @@
 #import "CDVGeofencing.h"
 #import <JavaScriptCore/JavaScriptCore.h>
 
+NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST_STORAGE_KEY";
+
 @implementation CDVGeofencing
 
-@synthesize regionList;
+@synthesize regionNameList;
 @synthesize serviceWorker;
 
 - (void)setupLocationManager:(CDVInvokedUrlCommand*)command
@@ -34,7 +36,17 @@
     [self.locationManager requestAlwaysAuthorization];
     [self.locationManager startUpdatingLocation];
     self.serviceWorker = [(CDVViewController*)self.viewController getCommandInstance:@"ServiceWorker"];
+    [self restoreRegionNameList];
     [self setupUnregister];
+}
+
+- (void)restoreRegionNameList
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableDictionary *restored = [[defaults objectForKey:REGION_NAME_LIST_STORAGE_KEY] mutableCopy];
+    if (restored != nil) {
+        regionNameList = restored;
+    }
 }
 
 - (void)setupUnregister
@@ -55,7 +67,13 @@
     for (region in [self.locationManager monitoredRegions]) {
         if ([region.identifier isEqualToString:identifier]) {
             [self.locationManager stopMonitoringForRegion:region];
-            [self.regionList removeObjectForKey:identifier];
+            [self.regionNameList removeObjectForKey:identifier];
+
+            // Save the region name list for when the app is quit
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            [defaults setObject:regionNameList forKey:REGION_NAME_LIST_STORAGE_KEY];
+            [defaults synchronize];
+
             NSLog(@"Unregistering Geofence %@", identifier);
             didRemove = YES;
         }
@@ -88,11 +106,17 @@
                 [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:id]];
                 
                 // Store a map of id's to names
-                if (self.regionList == nil) {
-                    self.regionList = [NSMutableDictionary dictionaryWithObject:[region valueForKey:@"name"] forKey:id];
+                if (self.regionNameList == nil) {
+                    self.regionNameList = [NSMutableDictionary dictionaryWithObject:[region valueForKey:@"name"] forKey:id];
                 } else {
-                    [self.regionList setObject:[region valueForKey:@"name"] forKey:id];
+                    [self.regionNameList setObject:[region valueForKey:@"name"] forKey:id];
                 }
+
+                // Save the region name list for when the app is quit
+                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                [defaults setObject:regionNameList forKey:REGION_NAME_LIST_STORAGE_KEY];
+                [defaults synchronize];
+
                 CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:id];
                 [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
             } else {
@@ -118,7 +142,7 @@
     NSDictionary *response, *geofencingRegion;
     for (region in [self.locationManager monitoredRegions]) {
         if ([region.identifier isEqualToString:id]) {
-            geofencingRegion = @{ @"name"       : [regionList objectForKey:region.identifier],
+            geofencingRegion = @{ @"name"       : [regionNameList objectForKey:region.identifier],
                                   @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
                                   @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
                                   @"radius"     : [NSNumber numberWithDouble:region.radius]
@@ -139,7 +163,31 @@
 
 - (void)getRegistrations:(CDVInvokedUrlCommand*)command
 {
-    
+    NSString *name = [command argumentAtIndex:0];
+    NSMutableArray *response = [[NSMutableArray alloc] init];
+    NSDictionary *geofencingRegion;
+    NSDictionary *registration;
+    CLCircularRegion *region;
+    for (region in [self.locationManager monitoredRegions]) {
+        if ([name isEqualToString:[regionNameList objectForKey:region.identifier]] || name == nil) {
+            geofencingRegion = @{ @"name"       : [regionNameList objectForKey:region.identifier],
+                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
+                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
+                                  @"radius"     : [NSNumber numberWithDouble:region.radius]
+                                  };
+            registration = @{ @"id"     : region.identifier,
+                              @"region" : geofencingRegion
+                          };
+            [response addObject:registration];
+        }
+    }
+    if ([response count] == 0) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"NotFoundError"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:response];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
 }
 
 -(void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region {

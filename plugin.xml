@@ -21,6 +21,12 @@
     <js-module src="www/GeofenceRegistration.js" name="GeofenceRegistration">
 	<clobbers target="GeofenceRegistration" />
     </js-module>
+    <js-module src="www/GeofenceRegisterOptions.js" name="GeofenceRegisterOptions">
+	<clobbers target="GeofenceRegisterOptions" />
+    </js-module>
+    <js-module src="www/GeofenceRegistrationQueryOptions.js" name="GeofenceRegistrationQueryOptions">
+	<clobbers target="GeofenceRegistrationQueryOptions" />
+    </js-module>
 
     <asset src="www/sw_assets/geofenceevents.js" target="sw_assets/geofenceevents.js" />    
 

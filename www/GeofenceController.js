@@ -5,7 +5,7 @@ GeofenceController = function() {
     return this;
 };
 
-GeofenceController.prototype.register = function(region) {
+GeofenceController.prototype.register = function(region, options) {
     return new Promise(function(resolve, reject) {
 	var success = function(id) {
 	    resolve(new GeofenceRegistration(id, region.name, region.latitude, region.longitude, region.radius));
@@ -21,7 +21,23 @@ GeofenceController.prototype.register = function(region) {
 };
 
 GeofenceController.prototype.getRegistrations = function(options) {
-
+    return new Promise(function(resolve, reject) {
+	var success = function(regs) {
+	    // Attach unregister function to each registration
+	    regs.forEach(function(reg){
+		reg.unregister = GeofenceRegistration.prototype.unregister;
+	    });
+	    resolve(regs);
+	};
+	var failure = function(err) {
+	    reject(err);
+	};
+	if(options != undefined && options.name != null) {
+	    exec(success, failure, "Geofencing", "getRegistrations", [options.name]);
+	} else {
+	    exec(success, failure, "Geofencing", "getRegistrations", []);
+	}
+    });
 };
 
 GeofenceController.prototype.getRegistration = function(id) {

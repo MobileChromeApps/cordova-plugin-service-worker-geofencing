@@ -24,7 +24,7 @@
 @interface CDVGeofencing : CDVPlugin {}
 
 @property (nonatomic, strong) CLLocationManager *locationManager;
-@property (nonatomic, strong) NSMutableDictionary *regionList;
+@property (nonatomic, strong) NSMutableDictionary *regionNameList;
 @property (nonatomic, strong) CDVServiceWorker *serviceWorker;
 
 @end
