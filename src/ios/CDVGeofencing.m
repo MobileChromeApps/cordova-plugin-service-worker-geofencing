@@ -196,10 +196,30 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 
 -(void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region {
     NSLog(@"Entered region %@", region.identifier);
+    NSError *error;
+    NSDictionary *dictionary = @{ @"id"         : region.identifier,
+                                  @"name"       : [regionNameList objectForKey:region.identifier],
+                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
+                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
+                                  @"radius"   : [NSNumber numberWithDouble:region.radius]
+                                 };
+    NSData *json = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
+    NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceEnterEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+    [serviceWorker.context evaluateScript:dispatchCode];
 }
 
 -(void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region {
     NSLog(@"Exited region %@",region.identifier);
+    NSError *error;
+    NSDictionary *dictionary = @{ @"id"         : region.identifier,
+                                  @"name"       : [regionNameList objectForKey:region.identifier],
+                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
+                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
+                                  @"radius"   : [NSNumber numberWithDouble:region.radius]
+                                  };
+    NSData *json = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
+    NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceLeaveEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+    [serviceWorker.context evaluateScript:dispatchCode];
 }
 
 -(void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {

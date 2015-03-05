@@ -29,6 +29,8 @@
     </js-module>
 
     <asset src="www/sw_assets/geofenceevents.js" target="sw_assets/geofenceevents.js" />    
+    <asset src="www/sw_assets/GeofenceRegionAsset.js" target="sw_assets/GeofenceRegionAsset.js" />
+    <asset src="www/sw_assets/GeofenceRegistrationAsset.js" target="sw_assets/GeofenceRegistrationAsset.js" />
 
     <platform name="ios">
 	<config-file target="config.xml" parent="/*">

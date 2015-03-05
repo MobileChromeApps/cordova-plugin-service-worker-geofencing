@@ -35,8 +35,9 @@ GeofenceEnterEvent.prototype = new ExtendableEvent('geofenceenter');
 GeofenceLeaveEvent.prototype = new ExtendableEvent('geofenceleave');
 GeofenceErrorEvent.prototype = new ExtendableEvent('geofenceerror');
 
-FireGeofenceEnterEvent = function() {
+FireGeofenceEnterEvent = function(data) {
     var ev = new GeofenceEnterEvent();
+    ev.registration = new GeofenceRegistration(data.id, data.name, data.latitude, data.longitude, data.radius);
     dispatchEvent(ev);
     if(ev.promises instanceof Array) {
 	// TODO something
@@ -45,8 +46,9 @@ FireGeofenceEnterEvent = function() {
     }
 };
 
-FireGeofenceLeaveEvent = function() {
+FireGeofenceLeaveEvent = function(data) {
     var ev = new GeofenceLeaveEvent();
+    ev.registration = new GeofenceRegistration(data.id, data.name, data.latitude, data.longitude, data.radius);
     dispatchEvent(ev);
     if(ev.promises instanceof Array) {
 	// TODO something
@@ -55,7 +57,7 @@ FireGeofenceLeaveEvent = function() {
     }
 };
 
-FireGeofenceErrorEvent = function() {
+FireGeofenceErrorEvent = function(data) {
     var ev = new GeofenceErrorEvent();
     dispatchEvent(ev);
     if(ev.promises instanceof Array) {
