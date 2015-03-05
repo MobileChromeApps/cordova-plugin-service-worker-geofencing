@@ -27,11 +27,13 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 
 @synthesize regionNameList;
 @synthesize serviceWorker;
+@synthesize locationManager;
 
 - (void)setupLocationManager:(CDVInvokedUrlCommand*)command
 {
     self.locationManager = [[CLLocationManager alloc] init];
     self.locationManager.desiredAccuracy = kCLLocationAccuracyBest; //TODO: Allow plugin user to set desired accuracy through javasript
+    locationManager.distanceFilter = kCLDistanceFilterNone;
     self.locationManager.delegate = self;
     [self.locationManager requestAlwaysAuthorization];
     [self.locationManager startUpdatingLocation];
@@ -194,6 +196,10 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     NSLog(@"Started monitoring for %@", region.identifier);
 }
 
+-(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+    NSLog(@"Error: %@ %@", error, [error userInfo]);
+}
+
 -(void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region {
     NSLog(@"Entered region %@", region.identifier);
     NSError *error;
@@ -226,6 +232,10 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     NSLog(@"Authorization status has changed!");
 }
 
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
+
+}
+
 //Helper function for generating unique ID's for the regions
 - (NSString *)uuid
 {
@@ -233,6 +243,39 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     CFStringRef uuidString = CFUUIDCreateString(NULL, uuid);
     CFRelease(uuid);
     return (__bridge_transfer NSString *)uuidString;
+}
+
+- (void)getCurrentLocation:(CDVInvokedUrlCommand*)command
+{
+    CLLocation *currentLocation = [self.locationManager location];
+    NSDictionary *response = @{ @"latitude"    : [NSNumber numberWithDouble:currentLocation.coordinate.latitude],
+                                @"longitude"   : [NSNumber numberWithDouble:currentLocation.coordinate.longitude]
+                                };
+    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+}
+
+// For Testing purposes
+NSString *callback;
+
+- (void)setupTestResponse:(CDVInvokedUrlCommand*)command
+{
+    callback = command.callbackId;
+
+    //create weak reference to self in order to prevent retain cycle in block
+    __weak CDVGeofencing* weakSelf = self;
+
+    // Set up service worker unregister event
+    serviceWorker.context[@"respondToTest"] = ^(JSValue *message) {
+        NSString *response = [message toString];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:response];
+        [result setKeepCallback:[NSNumber numberWithBool:YES]];
+        [weakSelf.commandDelegate sendPluginResult:result callbackId:callback];
+    };
+
+    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [result setKeepCallback:[NSNumber numberWithBool:YES]];
+    [self.commandDelegate sendPluginResult:result callbackId:callback];
 }
 
 @end
