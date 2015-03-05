@@ -1,11 +1,15 @@
+function GeolocationPoint(lat, lon) {
+    this.latitude = lat;
+    this.longitude = lon;
+}
+
 function GeofenceRegion(name) {
     this.name = name;
 };
 
 function CircularGeofenceRegion(name, lat, lon, radius) {
     GeofenceRegion.call(this, name);
-    this.latitude = lat;
-    this.longitude = lon;
+    this.center = new GeolocationPoint(lat, lon);
     this.radius = radius;
 };
 

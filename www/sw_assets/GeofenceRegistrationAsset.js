@@ -9,15 +9,5 @@ function GeofenceRegistration(id, name, lat, lon, radius) {
 
 GeofenceRegistration.prototype.unregister = function() {
     unregisterGeofence(this.id);
-    /*var scopeId = this.id;
-    return new Promise(function(resolve, reject) {
-	var success = function() {
-	    resolve();
-	};
-	var failure = function(err) {
-	    reject();
-	};
-	unregisterGeofence(scopeId);
-    });*/
 };
 

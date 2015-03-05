@@ -27,6 +27,9 @@
     <js-module src="www/GeofenceRegistrationQueryOptions.js" name="GeofenceRegistrationQueryOptions">
 	<clobbers target="GeofenceRegistrationQueryOptions" />
     </js-module>
+    <js-module src="www/GeolocationPoint.js" name="GeolocationPoint">
+	<clobbers target="GeolocationPoint" />
+    </js-module>
 
     <asset src="www/sw_assets/geofenceevents.js" target="sw_assets/geofenceevents.js" />    
     <asset src="www/sw_assets/GeofenceRegionAsset.js" target="sw_assets/GeofenceRegionAsset.js" />

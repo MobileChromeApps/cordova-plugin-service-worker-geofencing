@@ -1,11 +1,11 @@
 var exec = require('cordova/exec');
 var geofenceController = require('./GeofenceController');
 var geofenceRegion = require('./GeofenceRegion');
+var geofencePoint = require('./GeolocationPoint');
 
 function CircularGeofenceRegion(name, lat, lon, radius) {
     GeofenceRegion.call(this, name);
-    this.latitude = lat;
-    this.longitude = lon;
+    this.center = new GeolocationPoint(lat, lon);
     this.radius = radius;
 };
 
