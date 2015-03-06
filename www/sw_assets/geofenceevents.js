@@ -38,6 +38,7 @@ GeofenceErrorEvent.prototype = new ExtendableEvent('geofenceerror');
 FireGeofenceEnterEvent = function(data) {
     var ev = new GeofenceEnterEvent();
     ev.registration = new GeofenceRegistration(data.id, data.name, data.latitude, data.longitude, data.radius);
+    ev.position = data.position;
     dispatchEvent(ev);
     if(ev.promises instanceof Array) {
 	// TODO something
@@ -49,6 +50,7 @@ FireGeofenceEnterEvent = function(data) {
 FireGeofenceLeaveEvent = function(data) {
     var ev = new GeofenceLeaveEvent();
     ev.registration = new GeofenceRegistration(data.id, data.name, data.latitude, data.longitude, data.radius);
+    ev.position = data.position;
     dispatchEvent(ev);
     if(ev.promises instanceof Array) {
 	// TODO something

@@ -192,6 +192,25 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     }
 }
 
+- (NSData*)createEventDataWithRegion:(CLRegion*)region
+{
+    NSError *error;
+    NSDictionary *position = [self getCurrentLocation];
+    if (position == nil) {
+        position = @{ @"latitude"   : @"Location services are unavailable",
+                      @"longitude"  : @"Location services are unavailable"
+                     };
+    }
+    NSDictionary *dictionary = @{ @"id"         : region.identifier,
+                                  @"name"       : [regionNameList objectForKey:region.identifier],
+                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
+                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
+                                  @"radius"     : [NSNumber numberWithDouble:region.radius],
+                                  @"position"   : position
+                                };
+    return [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
+}
+
 -(void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region {
     NSLog(@"Started monitoring for %@", region.identifier);
 }
@@ -202,28 +221,14 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 
 -(void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region {
     NSLog(@"Entered region %@", region.identifier);
-    NSError *error;
-    NSDictionary *dictionary = @{ @"id"         : region.identifier,
-                                  @"name"       : [regionNameList objectForKey:region.identifier],
-                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
-                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
-                                  @"radius"   : [NSNumber numberWithDouble:region.radius]
-                                 };
-    NSData *json = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
+    NSData *json = [self createEventDataWithRegion:region];
     NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceEnterEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [serviceWorker.context evaluateScript:dispatchCode];
 }
 
 -(void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region {
     NSLog(@"Exited region %@",region.identifier);
-    NSError *error;
-    NSDictionary *dictionary = @{ @"id"         : region.identifier,
-                                  @"name"       : [regionNameList objectForKey:region.identifier],
-                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
-                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
-                                  @"radius"   : [NSNumber numberWithDouble:region.radius]
-                                  };
-    NSData *json = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
+    NSData *json = [self createEventDataWithRegion:region];
     NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceLeaveEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [serviceWorker.context evaluateScript:dispatchCode];
 }
@@ -257,6 +262,18 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     } else {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Location services are not currently enabled"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+- (NSDictionary*)getCurrentLocation
+{
+    if ([CLLocationManager locationServicesEnabled]) {
+        CLLocation *currentLocation = [self.locationManager location];
+        return @{ @"latitude"    : [NSNumber numberWithDouble:currentLocation.coordinate.latitude],
+                  @"longitude"   : [NSNumber numberWithDouble:currentLocation.coordinate.longitude]
+                };
+    } else {
+        return nil;
     }
 }
 
