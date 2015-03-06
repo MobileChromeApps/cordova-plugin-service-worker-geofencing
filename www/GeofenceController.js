@@ -8,7 +8,7 @@ GeofenceController = function() {
 GeofenceController.prototype.register = function(region, options) {
     return new Promise(function(resolve, reject) {
 	var success = function(id) {
-	    resolve(new GeofenceRegistration(id, region.name, region.latitude, region.longitude, region.radius));
+	    resolve(new GeofenceRegistration(id, region.name, region.center.latitude, region.center.longitude, region.radius));
 	};
 	var failure = function(err) {
 	    if (err === "PermissionDeniedError") {

@@ -103,8 +103,8 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
                 NSString *id = [self uuid];
                 NSDictionary *region = [command argumentAtIndex:0];
                 CLLocationCoordinate2D location;
-                location.latitude = [[region valueForKey:@"latitude"] doubleValue];
-                location.longitude = [[region valueForKey:@"longitude"] doubleValue];
+                location.latitude = [[[region objectForKey:@"center"] valueForKey:@"latitude"] doubleValue];
+                location.longitude = [[[region objectForKey:@"center"] valueForKey:@"longitude"] doubleValue];
                 [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:id]];
                 
                 // Store a map of id's to names
@@ -247,12 +247,17 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 
 - (void)getCurrentLocation:(CDVInvokedUrlCommand*)command
 {
-    CLLocation *currentLocation = [self.locationManager location];
-    NSDictionary *response = @{ @"latitude"    : [NSNumber numberWithDouble:currentLocation.coordinate.latitude],
-                                @"longitude"   : [NSNumber numberWithDouble:currentLocation.coordinate.longitude]
-                                };
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
-    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    if ([CLLocationManager locationServicesEnabled]) {
+        CLLocation *currentLocation = [self.locationManager location];
+        NSDictionary *response = @{ @"latitude"    : [NSNumber numberWithDouble:currentLocation.coordinate.latitude],
+                                    @"longitude"   : [NSNumber numberWithDouble:currentLocation.coordinate.longitude]
+                                    };
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Location services are not currently enabled"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
 }
 
 // For Testing purposes
