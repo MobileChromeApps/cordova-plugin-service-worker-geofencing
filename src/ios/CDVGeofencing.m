@@ -53,10 +53,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 
 - (void)setupUnregister
 {
-    //create weak reference to self in order to prevent retain cycle in block
     __weak CDVGeofencing* weakSelf = self;
-    
-    // Set up service worker unregister event
     serviceWorker.context[@"unregisterGeofence"] = ^(JSValue *regionId) {
         [weakSelf unregisterRegionById:[regionId toString]];
     };
@@ -97,7 +94,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 - (void)registerRegion:(CDVInvokedUrlCommand*)command
 {
     if ([CLLocationManager locationServicesEnabled]) {
-        if([CLLocationManager regionMonitoringAvailable])
+        if ([CLLocationManager regionMonitoringAvailable])
         {
             if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedAlways) {
                 NSString *id = [self uuid];
@@ -106,8 +103,6 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
                 location.latitude = [[[region objectForKey:@"center"] valueForKey:@"latitude"] doubleValue];
                 location.longitude = [[[region objectForKey:@"center"] valueForKey:@"longitude"] doubleValue];
                 [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:id]];
-                
-                // Store a map of id's to names
                 if (self.regionNameList == nil) {
                     self.regionNameList = [NSMutableDictionary dictionaryWithObject:[region valueForKey:@"name"] forKey:id];
                 } else {
@@ -118,12 +113,12 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
                 [defaults setObject:regionNameList forKey:REGION_NAME_LIST_STORAGE_KEY];
                 [defaults synchronize];
-
                 CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:id];
                 [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
             } else {
-                NSLog(@"PermissionDeniedError");
-                //TODO: Send display an alert requesting user to change settings
+                NSLog(@"Not authorized to use location services");
+                CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"PermissionDeniedError"];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
             }
         } else {
             NSLog(@"Region monitoring is unavailable");
@@ -211,37 +206,42 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     return [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
 }
 
--(void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region {
+- (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion*)region
+{
     NSLog(@"Started monitoring for %@", region.identifier);
 }
 
--(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError*)error
+{
     NSLog(@"Error: %@ %@", error, [error userInfo]);
 }
 
--(void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region {
+- (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion*)region
+{
     NSLog(@"Entered region %@", region.identifier);
     NSData *json = [self createEventDataWithRegion:region];
     NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceEnterEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [serviceWorker.context evaluateScript:dispatchCode];
 }
 
--(void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region {
+- (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion*)region
+{
     NSLog(@"Exited region %@",region.identifier);
     NSData *json = [self createEventDataWithRegion:region];
     NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceLeaveEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [serviceWorker.context evaluateScript:dispatchCode];
 }
 
--(void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
-    NSLog(@"Authorization status has changed!");
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+    NSLog(@"Authorization status has changed");
 }
 
-- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray*)locations
+{
 
 }
 
-//Helper function for generating unique ID's for the regions
 - (NSString *)uuid
 {
     CFUUIDRef uuid = CFUUIDCreate(NULL);
@@ -283,18 +283,13 @@ NSString *callback;
 - (void)setupTestResponse:(CDVInvokedUrlCommand*)command
 {
     callback = command.callbackId;
-
-    //create weak reference to self in order to prevent retain cycle in block
     __weak CDVGeofencing* weakSelf = self;
-
-    // Set up service worker unregister event
     serviceWorker.context[@"respondToTest"] = ^(JSValue *message) {
         NSString *response = [message toString];
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:response];
         [result setKeepCallback:[NSNumber numberWithBool:YES]];
         [weakSelf.commandDelegate sendPluginResult:result callbackId:callback];
     };
-
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
     [result setKeepCallback:[NSNumber numberWithBool:YES]];
     [self.commandDelegate sendPluginResult:result callbackId:callback];

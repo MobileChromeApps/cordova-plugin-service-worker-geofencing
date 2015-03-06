@@ -23,8 +23,7 @@ GeofenceController.prototype.register = function(region, options) {
 GeofenceController.prototype.getRegistrations = function(options) {
     return new Promise(function(resolve, reject) {
 	var success = function(regs) {
-	    // Attach unregister function to each registration
-	    regs.forEach(function(reg){
+	    regs.forEach(function(reg) {
 		reg.unregister = GeofenceRegistration.prototype.unregister;
 	    });
 	    resolve(regs);
@@ -32,7 +31,7 @@ GeofenceController.prototype.getRegistrations = function(options) {
 	var failure = function(err) {
 	    reject(err);
 	};
-	if(options != undefined && options.name != null) {
+	if (options != undefined && options.name != null) {
 	    exec(success, failure, "Geofencing", "getRegistrations", [options.name]);
 	} else {
 	    exec(success, failure, "Geofencing", "getRegistrations", []);

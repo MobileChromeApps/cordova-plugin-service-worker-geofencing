@@ -19,7 +19,7 @@ GeofenceRegistration.prototype.unregister = function() {
 	    resolve();
 	};
 	var failure = function(err) {
-	    reject();
+	    reject(err);
 	};
 	exec(success, failure, "Geofencing", "unregister", [scopeId]);
     });
