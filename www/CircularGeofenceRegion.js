@@ -6,7 +6,11 @@ var geofencePoint = require('./GeolocationPoint');
 function CircularGeofenceRegion(name, lat, lon, radius) {
     GeofenceRegion.call(this, name);
     this.center = new GeolocationPoint(lat, lon);
-    this.radius = radius;
+    if (radius > 0) {
+	this.radius = radius;
+    } else {
+	this.radius = 150;
+    }
 };
 
 var constructor = function() {};
