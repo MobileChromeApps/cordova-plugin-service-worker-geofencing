@@ -40,6 +40,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     self.serviceWorker = [(CDVViewController*)self.viewController getCommandInstance:@"ServiceWorker"];
     [self restoreRegionNameList];
     [self setupUnregister];
+    [self cullRegionNameList];
 }
 
 - (void)restoreRegionNameList
@@ -97,24 +98,31 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
         if ([CLLocationManager regionMonitoringAvailable])
         {
             if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedAlways) {
-                NSString *id = [self uuid];
-                NSDictionary *region = [command argumentAtIndex:0];
-                CLLocationCoordinate2D location;
-                location.latitude = [[[region objectForKey:@"center"] valueForKey:@"latitude"] doubleValue];
-                location.longitude = [[[region objectForKey:@"center"] valueForKey:@"longitude"] doubleValue];
-                [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:id]];
-                if (self.regionNameList == nil) {
-                    self.regionNameList = [NSMutableDictionary dictionaryWithObject:[region valueForKey:@"name"] forKey:id];
-                } else {
-                    [self.regionNameList setObject:[region valueForKey:@"name"] forKey:id];
-                }
+                if ([regionNameList count] <= 20) {
+                    NSString *id = [self uuid];
+                    NSDictionary *region = [command argumentAtIndex:0];
+                    CLLocationCoordinate2D location;
+                    location.latitude = [[[region objectForKey:@"center"] valueForKey:@"latitude"] doubleValue];
+                    location.longitude = [[[region objectForKey:@"center"] valueForKey:@"longitude"] doubleValue];
+                    [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:id]];
+                    if (self.regionNameList == nil) {
+                        self.regionNameList = [NSMutableDictionary dictionaryWithObject:[region valueForKey:@"name"] forKey:id];
+                    } else {
+                        [self.regionNameList setObject:[region valueForKey:@"name"] forKey:id];
+                    }
 
-                // Save the region name list for when the app is quit
-                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-                [defaults setObject:regionNameList forKey:REGION_NAME_LIST_STORAGE_KEY];
-                [defaults synchronize];
-                CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:id];
-                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                    // Save the region name list for when the app is quit
+                    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                    [defaults setObject:regionNameList forKey:REGION_NAME_LIST_STORAGE_KEY];
+                    [defaults synchronize];
+                    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:id];
+                    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                } else {
+                    NSLog(@"Registration Quota Exceeded");
+                    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"QuotaExceededError"];
+                    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+
+                }
             } else {
                 NSLog(@"Not authorized to use location services");
                 CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"PermissionDeniedError"];
