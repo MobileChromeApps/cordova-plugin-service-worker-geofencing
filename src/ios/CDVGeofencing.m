@@ -40,7 +40,6 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     self.serviceWorker = [(CDVViewController*)self.viewController getCommandInstance:@"ServiceWorker"];
     [self restoreRegionNameList];
     [self setupUnregister];
-    [self cullRegionNameList];
 }
 
 - (void)restoreRegionNameList
