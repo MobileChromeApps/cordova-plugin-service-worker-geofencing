@@ -46,10 +46,10 @@ cd GeofenceDemo
 cordova platform add ios
 cordova plugin add https://github.com/mwoghiren/cordova-plugin-serviceworker.git
 cordova plugin add https://github.com/imintz/cordova-plugin-geofencing.git
-mv 'plugins/cordova-plugin-geofencing/test/config.xml' 'config.xml'
-mv 'plugins/cordova-plugin-geofencing/test/sw.js' 'www/sw.js'
-mv 'plugins/cordova-plugin-geofencing/test/index.html' 'www/index.html'
-mv 'plugins/cordova-plugin-geofencing/test/js/index.js' 'www/js/index.js'
+mv 'plugins/cordova-plugin-geofencing/sample/config.xml' 'config.xml'
+mv 'plugins/cordova-plugin-geofencing/sample/sw.js' 'www/sw.js'
+mv 'plugins/cordova-plugin-geofencing/sample/index.html' 'www/index.html'
+mv 'plugins/cordova-plugin-geofencing/sample/js/index.js' 'www/js/index.js'
 cordova prepare
 ```
 
