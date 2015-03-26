@@ -41,7 +41,7 @@ self.ongeofenceleave = function(event) {
 ###Sample App
 To see this plugin in action, run the following commands to create the [sample app](https://github.com/imintz/cordova-plugin-geofencing/tree/master/test)
 ```bash
-cordova create GeofenceDemo
+cordova create GeofenceDemo io.cordova.geofencedemo GeofenceDemo
 cd GeofenceDemo
 cordova platform add ios
 cordova plugin add https://github.com/mwoghiren/cordova-plugin-serviceworker.git
