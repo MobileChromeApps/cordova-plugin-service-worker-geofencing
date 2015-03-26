@@ -19,7 +19,7 @@ On your active page:
 ```javascript
 navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
   var region = new CircularGeofenceRegion("Name", latitude, longitude, radius);
-  serviceWorkerRegistration.geofencing.register(region).then(function(regionRegistration) {
+  serviceWorkerRegistration.geofencing.add(region).then(function(regionRegistration) {
     console.log("Created Geofence " + regionRegistration);
   }, function(error) {
     console.log("Error: " + error);
@@ -29,12 +29,12 @@ navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
 In your service worker script:
 ```javascript
 self.ongeofenceenter = function(event) {
-  console.log("Entered Region with Name: " + event.registration.region.name);
+  console.log("Entered Region with Name: " + event.geofence.region.name);
   console.log("Position: " + event.position.latitude + ", " + event.position.longitude);
 };
 
 self.ongeofenceleave = function(event) {
-  console.log("Exited Region with Name: " + event.registration.region.name);
+  console.log("Exited Region with Name: " + event.geofence.region.name);
   console.log("Position: " + event.position.latitude + ", " + event.position.longitude);
 };
 ```
