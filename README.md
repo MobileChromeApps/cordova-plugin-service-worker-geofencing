@@ -12,7 +12,7 @@ cordova plugin add https://github.com/imintz/cordova-plugin-geofencing.git
 ```
 To remove the plugin use
 ```
-cordova plugin rm org.apache.cordova.geofencing
+cordova plugin rm cordova-plugin-geofencing
 ```
 ##Example Usage
 On your active page:
@@ -46,10 +46,10 @@ cd GeofenceDemo
 cordova platform add ios
 cordova plugin add https://github.com/mwoghiren/cordova-plugin-serviceworker.git
 cordova plugin add https://github.com/imintz/cordova-plugin-geofencing.git
-mv 'plugins/org.apache.cordova.geofencing/test/config.xml' 'config.xml'
-mv 'plugins/org.apache.cordova.geofencing/test/sw.js' 'www/sw.js'
-mv 'plugins/org.apache.cordova.geofencing/test/index.html' 'www/index.html'
-mv 'plugins/org.apache.cordova.geofencing/test/js/index.js' 'www/js/index.js'
+mv 'plugins/cordova-plugin-geofencing/test/config.xml' 'config.xml'
+mv 'plugins/cordova-plugin-geofencing/test/sw.js' 'www/sw.js'
+mv 'plugins/cordova-plugin-geofencing/test/index.html' 'www/index.html'
+mv 'plugins/cordova-plugin-geofencing/test/js/index.js' 'www/js/index.js'
 cordova prepare
 ```
 
