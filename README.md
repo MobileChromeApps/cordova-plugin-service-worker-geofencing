@@ -19,7 +19,7 @@ On your active page:
 ```javascript
 navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
   var region = new CircularGeofenceRegion("Name", latitude, longitude, radius);
-  serviceWorkerRegistration.register(region).then(function(regionRegistration) {
+  serviceWorkerRegistration.geofencing.register(region).then(function(regionRegistration) {
     console.log("Created Geofence " + regionRegistration);
   }, function(error) {
     console.log("Error: " + error);
