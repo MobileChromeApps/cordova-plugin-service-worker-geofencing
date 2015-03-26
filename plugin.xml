@@ -9,8 +9,8 @@
 
     <dependency id="org.apache.cordova.serviceworker" url="https://github.com/mwoghiren/cordova-plugin-serviceworker.git" />
 
-    <js-module src="www/GeofenceController.js" name="GeofenceController">
-	<clobbers target="GeofenceController" />
+    <js-module src="www/GeofenceManager.js" name="GeofenceManager">
+	<clobbers target="GeofenceManager" />
     </js-module>
     <js-module src="www/GeofenceRegion.js" name="GeofenceRegion">
 	<clobbers target="GeofenceRegion" />
@@ -18,14 +18,14 @@
     <js-module src="www/CircularGeofenceRegion.js" name="CircularGeofenceRegion">
 	<clobbers target="CircularGeofenceRegion" />
     </js-module>
-    <js-module src="www/GeofenceRegistration.js" name="GeofenceRegistration">
-	<clobbers target="GeofenceRegistration" />
+    <js-module src="www/Geofence.js" name="Geofence">
+	<clobbers target="Geofence" />
     </js-module>
-    <js-module src="www/GeofenceRegisterOptions.js" name="GeofenceRegisterOptions">
-	<clobbers target="GeofenceRegisterOptions" />
+    <js-module src="www/GeofenceOptions.js" name="GeofenceOptions">
+	<clobbers target="GeofenceOptions" />
     </js-module>
-    <js-module src="www/GeofenceRegistrationQueryOptions.js" name="GeofenceRegistrationQueryOptions">
-	<clobbers target="GeofenceRegistrationQueryOptions" />
+    <js-module src="www/GeofenceQueryOptions.js" name="GeofenceQueryOptions">
+	<clobbers target="GeofenceQueryOptions" />
     </js-module>
     <js-module src="www/GeolocationPoint.js" name="GeolocationPoint">
 	<clobbers target="GeolocationPoint" />
@@ -33,7 +33,7 @@
 
     <asset src="www/sw_assets/geofenceevents.js" target="sw_assets/geofenceevents.js" />    
     <asset src="www/sw_assets/GeofenceRegionAsset.js" target="sw_assets/GeofenceRegionAsset.js" />
-    <asset src="www/sw_assets/GeofenceRegistrationAsset.js" target="sw_assets/GeofenceRegistrationAsset.js" />
+    <asset src="www/sw_assets/GeofenceAsset.js" target="sw_assets/GeofenceAsset.js" />
 
     <platform name="ios">
 	<config-file target="config.xml" parent="/*">

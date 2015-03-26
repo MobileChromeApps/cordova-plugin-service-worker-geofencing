@@ -1,14 +1,14 @@
 var exec = require('cordova/exec');
 var serviceWorker = require('org.apache.cordova.serviceworker.ServiceWorker');
 
-GeofenceController = function() {
+GeofenceManager = function() {
     return this;
 };
 
-GeofenceController.prototype.register = function(region, options) {
+GeofenceManager.prototype.add = function(region, options) {
     return new Promise(function(resolve, reject) {
 	var success = function(id) {
-	    resolve(new GeofenceRegistration(id, region.name, region.center.latitude, region.center.longitude, region.radius));
+	    resolve(new Geofence(id, region.name, region.center.latitude, region.center.longitude, region.radius));
 	};
 	var failure = function(err) {
 	    if (err === "PermissionDeniedError") {
@@ -20,18 +20,18 @@ GeofenceController.prototype.register = function(region, options) {
     });
 };
 
-GeofenceController.prototype.getRegistrations = function(options) {
+GeofenceManager.prototype.getAll = function(options) {
     return new Promise(function(resolve, reject) {
 	var success = function(regs) {
 	    regs.forEach(function(reg) {
-		reg.unregister = GeofenceRegistration.prototype.unregister;
+		reg.remove = Geofence.prototype.remove;
 	    });
 	    resolve(regs);
 	};
 	var failure = function(err) {
 	    reject(err);
 	};
-	if (options != undefined && options.name != null) {
+	if (options !== undefined && options.name !== null) {
 	    exec(success, failure, "Geofencing", "getRegistrations", [options.name]);
 	} else {
 	    exec(success, failure, "Geofencing", "getRegistrations", []);
@@ -39,7 +39,7 @@ GeofenceController.prototype.getRegistrations = function(options) {
     });
 };
 
-GeofenceController.prototype.getRegistration = function(id) {
+GeofenceManager.prototype.getById = function(id) {
     return new Promise(function(resolve, reject) {
 	var success = function(registration) {
 	    resolve(registration);
@@ -52,8 +52,8 @@ GeofenceController.prototype.getRegistration = function(id) {
 };
 
 navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
-    serviceWorkerRegistration.geofencing = new GeofenceController();
+    serviceWorkerRegistration.geofencing = new GeofenceManager();
     exec(null, null, "Geofencing", "setupLocationManager", []);
 });
 
-module.exports = GeofenceController;
+module.exports = GeofenceManager;

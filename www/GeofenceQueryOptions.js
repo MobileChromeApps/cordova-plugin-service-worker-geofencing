@@ -1,8 +1,8 @@
 var exec = require('cordova/exec');
 var geofenceController = require('./GeofenceManager');
 
-function GeofenceRegion(name) {
+function GeofenceQueryOptions(name) {
     this.name = name;
 }
 
-module.exports = GeofenceRegion;
+module.exports = GeofenceQueryOptions;

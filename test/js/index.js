@@ -44,7 +44,7 @@ var app = {
 	    var createGeofenceAtCurrentLocation = function() {
 		var success = function(loc) {
 		    var region = new CircularGeofenceRegion(document.getElementById("nameArea").value, loc.latitude, loc.longitude, 50);
-		    swreg.geofencing.register(region).then(function(reg) {
+		    swreg.geofencing.add(region).then(function(reg) {
 			document.getElementById("messageArea").value = "Created Geofence " + reg.region.name + " at:\nLatitude: " + loc.latitude + "\nLongitude: " + loc.longitude;
 		    }, function(err) {
 			console.log(err);
@@ -54,9 +54,9 @@ var app = {
 	    };
 	    document.getElementById("createGeofenceBtn").onclick = createGeofenceAtCurrentLocation;
 	    var clearFences = function() {
-		swreg.geofencing.getRegistrations().then(function(regs) {
+		swreg.geofencing.getAll().then(function(regs) {
 		    regs.forEach(function(reg) {
-			reg.unregister();
+			reg.remove();
 		    });
 		    document.getElementById("messageArea").value = "Cleared Fences";
 		}, function() {

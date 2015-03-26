@@ -1,18 +1,18 @@
 var exec = require('cordova/exec');
-var geofenceController = require('./GeofenceController');
+var geofenceController = require('./GeofenceManager');
 var geofenceRegion = require('./GeofenceRegion');
 var circularGeofenceRegion = require('./CircularGeofenceRegion');
 
-function GeofenceRegistration(id, name, lat, lon, radius) {
+function Geofence(id, name, lat, lon, radius) {
     this.id = id;
-    if (lat != null && lon != null && radius != null) {
+    if (lat !== undefined && lon !== undefined && radius !== undefined) {
 	this.region = new CircularGeofenceRegion(name, lat, lon, radius);
     } else {
 	this.region = new GeofenceRegion(name);
     }
-};
+}
 
-GeofenceRegistration.prototype.unregister = function() {
+Geofence.prototype.remove = function() {
     var scopeId = this.id;
     return new Promise(function(resolve, reject) {
 	var success = function() {
@@ -25,4 +25,4 @@ GeofenceRegistration.prototype.unregister = function() {
     });
 };
 
-module.exports = GeofenceRegistration;
+module.exports = Geofence;
