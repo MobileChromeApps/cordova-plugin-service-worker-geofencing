@@ -36,7 +36,5 @@ function CircularGeofenceRegion(name, lat, lon, radius) {
     }
 }
 
-var constructor = function() {};
-constructor.prototype = GeofenceRegion.prototype;
-CircularGeofenceRegion.prototype = new constructor();
+CircularGeofenceRegion.prototype = Object.create(GeofenceRegion.prototype);
 CircularGeofenceRegion.prototype.constructor = CircularGeofenceRegion;

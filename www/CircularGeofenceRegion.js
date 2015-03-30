@@ -18,9 +18,8 @@
  */
 
 var exec = require('cordova/exec');
-var geofenceController = require('./GeofenceManager');
-var geofenceRegion = require('./GeofenceRegion');
-var geofencePoint = require('./GeolocationPoint');
+var GeofenceRegion = require('./GeofenceRegion');
+var GeofencePoint = require('./GeolocationPoint');
 
 function CircularGeofenceRegion(name, lat, lon, radius) {
     GeofenceRegion.call(this, name);
@@ -32,9 +31,7 @@ function CircularGeofenceRegion(name, lat, lon, radius) {
     }
 }
 
-var constructor = function() {};
-constructor.prototype = GeofenceRegion.prototype;
-CircularGeofenceRegion.prototype = new constructor();
+CircularGeofenceRegion.prototype = Object.create(GeofenceRegion.prototype);
 CircularGeofenceRegion.prototype.constructor = CircularGeofenceRegion;
 
 module.exports = CircularGeofenceRegion;

@@ -54,7 +54,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 - (void)setupUnregister
 {
     __weak CDVGeofencing* weakSelf = self;
-    serviceWorker.context[@"unregisterGeofence"] = ^(JSValue *regionId) {
+    serviceWorker.context[@"CDVGeofencing_unregisterGeofence"] = ^(JSValue *regionId) {
         [weakSelf unregisterRegionById:[regionId toString]];
     };
 }
@@ -173,7 +173,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     NSDictionary *registration;
     CLCircularRegion *region;
     for (region in [self.locationManager monitoredRegions]) {
-        if ([name isEqualToString:[regionNameList objectForKey:region.identifier]] || name == nil) {
+        if ([name isEqualToString:[regionNameList objectForKey:region.identifier]]) {
             geofencingRegion = @{ @"name"       : [regionNameList objectForKey:region.identifier],
                                   @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
                                   @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
@@ -186,7 +186,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
         }
     }
     if ([response count] == 0) {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"NotFoundError"];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[NSArray array]];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:response];

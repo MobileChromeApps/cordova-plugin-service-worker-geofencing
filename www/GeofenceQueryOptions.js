@@ -17,9 +17,6 @@
  under the License.
  */
 
-var exec = require('cordova/exec');
-var geofenceController = require('./GeofenceManager');
-
 function GeofenceQueryOptions(name) {
     this.name = name;
 }

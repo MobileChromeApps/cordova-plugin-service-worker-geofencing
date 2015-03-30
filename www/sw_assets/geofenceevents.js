@@ -51,11 +51,6 @@ FireGeofenceEnterEvent = function(data) {
     ev.geofence = new Geofence(data.id, data.name, data.latitude, data.longitude, data.radius);
     ev.position = data.position;
     dispatchEvent(ev);
-    if (ev.promises instanceof Array) {
-	// TODO something
-    } else {
-	// TODO something
-    }
 };
 
 FireGeofenceLeaveEvent = function(data) {
@@ -63,19 +58,9 @@ FireGeofenceLeaveEvent = function(data) {
     ev.geofence = new Geofence(data.id, data.name, data.latitude, data.longitude, data.radius);
     ev.position = data.position;
     dispatchEvent(ev);
-    if (ev.promises instanceof Array) {
-	// TODO something
-    } else {
-	// TODO something
-    }
 };
 
 FireGeofenceErrorEvent = function(data) {
     var ev = new GeofenceErrorEvent();
     dispatchEvent(ev);
-    if (ev.promises instanceof Array) {
-	// TODO something
-    } else {
-	// TODO something
-    }
 };

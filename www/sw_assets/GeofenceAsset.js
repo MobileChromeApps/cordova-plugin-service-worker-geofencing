@@ -26,7 +26,7 @@ function Geofence(id, name, lat, lon, radius) {
     }
 }
 
-Geofence.prototype.unregister = function() {
-    unregisterGeofence(this.id);
+Geofence.prototype.remove = function() {
+    CDVGeofencing_unregisterGeofence(this.id);
 };
 

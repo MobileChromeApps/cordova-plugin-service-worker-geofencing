@@ -18,7 +18,10 @@
  */
 
 var exec = require('cordova/exec');
-var serviceWorker = require('org.apache.cordova.serviceworker.ServiceWorker');
+
+function nativeToJSGeofence(geofence) {
+    return new Geofence(geofence.id, geofence.region.name, geofence.region.latitude, geofence.region.longitude, geofence.region.radius);
+}
 
 function GeofenceManager() {}
 
@@ -29,9 +32,10 @@ GeofenceManager.prototype.add = function(region, options) {
 	};
 	var failure = function(err) {
 	    if (err === "PermissionDeniedError") {
-		throw DOMException;
+		reject(new DOMException(err));
+	    } else {
+		reject(new Error(err));
 	    }
-	    reject(err);
 	};
 	exec(success, failure, "Geofencing", "registerRegion", [region]);
     });
@@ -40,12 +44,9 @@ GeofenceManager.prototype.add = function(region, options) {
 GeofenceManager.prototype.getAll = function(options) {
     return new Promise(function(resolve, reject) {
 	var success = function(regs) {
-	    regs.forEach(function(reg) {
-		reg.remove = Geofence.prototype.remove;
-	    });
-	    resolve(regs);
+	    resolve(regs.map(nativeToJSGeofence));
 	};
-	if (options !== undefined && options.name !== null) {
+	if (options && options.name) {
 	    exec(success, reject, "Geofencing", "getRegistrations", [options.name]);
 	} else {
 	    exec(success, reject, "Geofencing", "getRegistrations", []);
@@ -56,7 +57,7 @@ GeofenceManager.prototype.getAll = function(options) {
 GeofenceManager.prototype.getById = function(id) {
     return new Promise(function(resolve, reject) {
 	var success = function(registration) {
-	    resolve(registration);
+	    resolve(nativeToJSGeofence(registration));
 	};
 	exec(success, reject, "Geofencing", "getRegistration", [id]);
     });
