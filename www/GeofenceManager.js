@@ -1,9 +1,26 @@
+/*
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ */
+
 var exec = require('cordova/exec');
 var serviceWorker = require('org.apache.cordova.serviceworker.ServiceWorker');
 
-GeofenceManager = function() {
-    return this;
-};
+function GeofenceManager() {}
 
 GeofenceManager.prototype.add = function(region, options) {
     return new Promise(function(resolve, reject) {
@@ -28,13 +45,10 @@ GeofenceManager.prototype.getAll = function(options) {
 	    });
 	    resolve(regs);
 	};
-	var failure = function(err) {
-	    reject(err);
-	};
 	if (options !== undefined && options.name !== null) {
-	    exec(success, failure, "Geofencing", "getRegistrations", [options.name]);
+	    exec(success, reject, "Geofencing", "getRegistrations", [options.name]);
 	} else {
-	    exec(success, failure, "Geofencing", "getRegistrations", []);
+	    exec(success, reject, "Geofencing", "getRegistrations", []);
 	}
     });
 };
@@ -44,10 +58,7 @@ GeofenceManager.prototype.getById = function(id) {
 	var success = function(registration) {
 	    resolve(registration);
 	};
-	var failure = function(err) {
-	    reject(err);
-	};
-	exec(success,failure, "Geofencing", "getRegistration", [id]);
+	exec(success, reject, "Geofencing", "getRegistration", [id]);
     });
 };
 
