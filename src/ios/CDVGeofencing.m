@@ -222,7 +222,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 {
     NSLog(@"Entered region %@", region.identifier);
     NSData *json = [self createEventDataWithRegion:region];
-    NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceEnterEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+    NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceEnterEvent(%@);", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [serviceWorker.context evaluateScript:dispatchCode];
 }
 
@@ -230,7 +230,7 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 {
     NSLog(@"Exited region %@",region.identifier);
     NSData *json = [self createEventDataWithRegion:region];
-    NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceLeaveEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+    NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceLeaveEvent(%@);", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [serviceWorker.context evaluateScript:dispatchCode];
 }
 

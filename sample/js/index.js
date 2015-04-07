@@ -55,12 +55,14 @@ var app = {
 	    document.getElementById("createGeofenceBtn").onclick = createGeofenceAtCurrentLocation;
 	    var clearFences = function() {
 		swreg.geofencing.getAll().then(function(regs) {
-		    regs.forEach(function(reg) {
-			reg.remove();
-		    });
-		    document.getElementById("messageArea").value = "Cleared Fences";
-		}, function() {
-		    document.getElementById("messageArea").value = "No Fences to Clear";
+		    if (regs.length > 0) {
+			regs.forEach(function(reg) {
+			    reg.remove();
+			});
+			document.getElementById("messageArea").value = "Cleared Fences";
+		    } else {
+			document.getElementById("messageArea").value = "No Fences to Clear";
+		    }
 		});
 	    };
 	    document.getElementById("clearFencesBtn").onclick = clearFences;
