@@ -71,7 +71,6 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
             // Save the region name list for when the app is quit
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
             [defaults setObject:regionNameList forKey:REGION_NAME_LIST_STORAGE_KEY];
-            [defaults synchronize];
 
             NSLog(@"Unregistering Geofence %@", identifier);
             didRemove = YES;
@@ -101,19 +100,18 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
                     NSString *id = [self uuid];
                     NSDictionary *region = [command argumentAtIndex:0];
                     CLLocationCoordinate2D location;
-                    location.latitude = [[[region objectForKey:@"center"] valueForKey:@"latitude"] doubleValue];
-                    location.longitude = [[[region objectForKey:@"center"] valueForKey:@"longitude"] doubleValue];
-                    [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[[region valueForKey:@"radius"] doubleValue] identifier:id]];
+                    location.latitude = [region[@"center"][@"latitude"] doubleValue];
+                    location.longitude = [region[@"center"][@"longitude"] doubleValue];
+                    [self.locationManager startMonitoringForRegion:[[CLRegion alloc] initCircularRegionWithCenter:location radius:[region [@"radius"] doubleValue] identifier:id]];
                     if (self.regionNameList == nil) {
-                        self.regionNameList = [NSMutableDictionary dictionaryWithObject:[region valueForKey:@"name"] forKey:id];
+                        self.regionNameList = [NSMutableDictionary dictionaryWithObject:region[@"name"] forKey:id];
                     } else {
-                        [self.regionNameList setObject:[region valueForKey:@"name"] forKey:id];
+                        self.regionNameList[id] = region[@"name"];
                     }
 
                     // Save the region name list for when the app is quit
                     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
                     [defaults setObject:regionNameList forKey:REGION_NAME_LIST_STORAGE_KEY];
-                    [defaults synchronize];
                     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:id];
                     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
                 } else {
@@ -146,10 +144,10 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     NSDictionary *response, *geofencingRegion;
     for (region in [self.locationManager monitoredRegions]) {
         if ([region.identifier isEqualToString:id]) {
-            geofencingRegion = @{ @"name"       : [regionNameList objectForKey:region.identifier],
-                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
-                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
-                                  @"radius"     : [NSNumber numberWithDouble:region.radius]
+            geofencingRegion = @{ @"name"       : regionNameList[region.identifier],
+                                  @"latitude"   : @(region.center.latitude),
+                                  @"longitude"  : @(region.center.longitude),
+                                  @"radius"     : @(region.radius)
                                  };
             response = @{ @"id"     : region.identifier,
                           @"region" : geofencingRegion
@@ -167,23 +165,20 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 
 - (void)getRegistrations:(CDVInvokedUrlCommand*)command
 {
-    NSString *name = [command argumentAtIndex:0];
     NSMutableArray *response = [[NSMutableArray alloc] init];
     NSDictionary *geofencingRegion;
     NSDictionary *registration;
     CLCircularRegion *region;
     for (region in [self.locationManager monitoredRegions]) {
-        if ([name isEqualToString:[regionNameList objectForKey:region.identifier]]) {
-            geofencingRegion = @{ @"name"       : [regionNameList objectForKey:region.identifier],
-                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
-                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
-                                  @"radius"     : [NSNumber numberWithDouble:region.radius]
-                                  };
-            registration = @{ @"id"     : region.identifier,
-                              @"region" : geofencingRegion
-                          };
-            [response addObject:registration];
-        }
+        geofencingRegion = @{ @"name"       : regionNameList[region.identifier],
+                              @"latitude"   : @(region.center.latitude),
+                              @"longitude"  : @(region.center.longitude),
+                              @"radius"     : @(region.radius)
+                              };
+        registration = @{ @"id"     : region.identifier,
+                          @"region" : geofencingRegion
+                      };
+        [response addObject:registration];
     }
     if ([response count] == 0) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[NSArray array]];
@@ -204,10 +199,10 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
                      };
     }
     NSDictionary *dictionary = @{ @"id"         : region.identifier,
-                                  @"name"       : [regionNameList objectForKey:region.identifier],
-                                  @"latitude"   : [NSNumber numberWithDouble:region.center.latitude],
-                                  @"longitude"  : [NSNumber numberWithDouble:region.center.longitude],
-                                  @"radius"     : [NSNumber numberWithDouble:region.radius],
+                                  @"name"       : regionNameList[region.identifier],
+                                  @"latitude"   : @(region.center.latitude),
+                                  @"longitude"  : @(region.center.longitude),
+                                  @"radius"     : @(region.radius),
                                   @"position"   : position
                                 };
     return [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
