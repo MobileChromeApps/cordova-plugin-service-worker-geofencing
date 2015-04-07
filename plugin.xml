@@ -7,7 +7,7 @@
     <license>Apache 2.0</license>
     <keywords>cordova,geofencing</keywords>
 
-    <dependency id="org.apache.cordova.serviceworker" url="https://github.com/MobileChromeApps/cordova-plugin-serviceworker.git" />
+    <dependency id="cordova-plugin-service-worker" url="https://github.com/MobileChromeApps/cordova-plugin-serviceworker.git" />
 
     <js-module src="www/GeofenceManager.js" name="GeofenceManager">
 	<clobbers target="GeofenceManager" />

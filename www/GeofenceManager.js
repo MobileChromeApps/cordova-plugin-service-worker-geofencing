@@ -56,10 +56,13 @@ GeofenceManager.prototype.getAll = function(options) {
 
 GeofenceManager.prototype.getById = function(id) {
     return new Promise(function(resolve, reject) {
-	var success = function(registration) {
+	function success(registration) {
 	    resolve(nativeToJSGeofence(registration));
-	};
-	exec(success, reject, "Geofencing", "getRegistration", [id]);
+	}
+	function failure() {
+	    resolve(null);
+	}
+	exec(success, failure, "Geofencing", "getRegistration", [id]);
     });
 };
 
