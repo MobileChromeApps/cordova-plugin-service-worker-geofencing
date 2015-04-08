@@ -8,6 +8,7 @@
     <keywords>cordova,geofencing</keywords>
 
     <dependency id="cordova-plugin-service-worker" url="https://github.com/MobileChromeApps/cordova-plugin-serviceworker.git" />
+    <dependency id="cordova-plugin-geolocation" url="https://github.com/apache/cordova-plugin-geolocation.git" />
 
     <js-module src="www/GeofenceManager.js" name="GeofenceManager">
 	<clobbers target="GeofenceManager" />
@@ -48,7 +49,6 @@
 	<config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
 	    <string></string>
 	</config-file>
-	<header-file src="src/ios/CDVGeofencing.h" />
 	<source-file src="src/ios/CDVGeofencing.m" />
 	<framework src="CoreLocation.framework" />
     </platform>

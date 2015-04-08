@@ -18,28 +18,43 @@
  */
 
 #import <Cordova/CDV.h>
-#import "CDVGeofencing.h"
 #import <JavaScriptCore/JavaScriptCore.h>
+#include <objc/runtime.h>
+#import <Cordova/CDVPlugin.h>
+#import "CDVServiceWorker.h"
+#import "CDVLocation.h"
+#import <CoreLocation/CoreLocation.h>
 
-NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST_STORAGE_KEY";
+static NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST_STORAGE_KEY";
+
+@interface CDVGeofencing : CDVPlugin {}
+
+@property (nonatomic, strong) CLLocationManager *locationManager;
+@property (nonatomic, strong) NSMutableDictionary *regionNameList;
+@property (nonatomic, strong) CDVServiceWorker *serviceWorker;
+@property (nonatomic, strong) CDVLocation *geolocation;
+
+@end
+
+static CDVGeofencing *this;
 
 @implementation CDVGeofencing
 
 @synthesize regionNameList;
 @synthesize serviceWorker;
 @synthesize locationManager;
+@synthesize geolocation;
 
 - (void)setupLocationManager:(CDVInvokedUrlCommand*)command
 {
-    self.locationManager = [[CLLocationManager alloc] init];
-    self.locationManager.desiredAccuracy = kCLLocationAccuracyBest; //TODO: Allow plugin user to set desired accuracy through javasript
-    locationManager.distanceFilter = kCLDistanceFilterNone;
-    self.locationManager.delegate = self;
-    [self.locationManager requestAlwaysAuthorization];
-    [self.locationManager startUpdatingLocation];
+    this = self;
     self.serviceWorker = [self.commandDelegate getCommandInstance:@"ServiceWorker"];
+    self.geolocation = [self.commandDelegate getCommandInstance:@"Geolocation"];
+    self.locationManager = geolocation.locationManager;
+
     [self restoreRegionNameList];
     [self setupUnregister];
+    [self setupDelegateCallbacks];
 }
 
 - (void)restoreRegionNameList
@@ -57,6 +72,34 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     serviceWorker.context[@"CDVGeofencing_unregisterGeofence"] = ^(JSValue *regionId) {
         [weakSelf unregisterRegionById:[regionId toString]];
     };
+}
+
+- (void)setupDelegateCallbacks
+{
+    if([geolocation respondsToSelector:@selector(locationManager:didEnterRegion:)]) {
+        Method original, swizzled;
+        original = class_getInstanceMethod([self class], @selector(locationManager:didEnterRegion:));
+        swizzled = class_getInstanceMethod([geolocation class], @selector(locationManager:didEnterRegion:));
+        method_exchangeImplementations(original, swizzled);
+    } else {
+        class_addMethod([geolocation class], @selector(locationManager:didEnterRegion:), class_getMethodImplementation([self class], @selector(locationManager:didEnterRegion:)), nil);
+    }
+    if([geolocation respondsToSelector:@selector(locationManager:didExitRegion:)]) {
+        Method original, swizzled;
+        original = class_getInstanceMethod([self class], @selector(locationManager:didExitRegion:));
+        swizzled = class_getInstanceMethod([geolocation class], @selector(locationManager:didExitRegion:));
+        method_exchangeImplementations(original, swizzled);
+    } else {
+        class_addMethod([geolocation class], @selector(locationManager:didExitRegion:), class_getMethodImplementation([self class], @selector(locationManager:didExitRegion:)), nil);
+    }
+    if([geolocation respondsToSelector:@selector(locationManager:didStartMonitoringForRegion:)]) {
+        Method original, swizzled;
+        original = class_getInstanceMethod([self class], @selector(locationManager:didStartMonitoringForRegion:));
+        swizzled = class_getInstanceMethod([geolocation class], @selector(locationManager:didStartMonitoringForRegion:));
+        method_exchangeImplementations(original, swizzled);
+    } else {
+        class_addMethod([geolocation class], @selector(locationManager:didStartMonitoringForRegion:), class_getMethodImplementation([self class], @selector(locationManager:didStartMonitoringForRegion:)), nil);
+    }
 }
 
 - (BOOL)unregisterRegionById:(NSString *)identifier
@@ -213,35 +256,20 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
     NSLog(@"Started monitoring for %@", region.identifier);
 }
 
-- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError*)error
-{
-    NSLog(@"Error: %@ %@", error, [error userInfo]);
-}
-
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion*)region
 {
     NSLog(@"Entered region %@", region.identifier);
-    NSData *json = [self createEventDataWithRegion:region];
+    NSData *json = [this createEventDataWithRegion:region];
     NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceEnterEvent(%@);", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
-    [serviceWorker.context evaluateScript:dispatchCode];
+    [this.serviceWorker.context evaluateScript:dispatchCode];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion*)region
 {
     NSLog(@"Exited region %@",region.identifier);
-    NSData *json = [self createEventDataWithRegion:region];
+    NSData *json = [this createEventDataWithRegion:region];
     NSString *dispatchCode = [NSString stringWithFormat:@"FireGeofenceLeaveEvent(%@);", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
-    [serviceWorker.context evaluateScript:dispatchCode];
-}
-
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
-{
-    NSLog(@"Authorization status has changed");
-}
-
-- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray*)locations
-{
-
+    [this.serviceWorker.context evaluateScript:dispatchCode];
 }
 
 - (NSString *)uuid
@@ -256,8 +284,8 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 {
     if ([CLLocationManager locationServicesEnabled]) {
         CLLocation *currentLocation = [self.locationManager location];
-        NSDictionary *response = @{ @"latitude"    : [NSNumber numberWithDouble:currentLocation.coordinate.latitude],
-                                    @"longitude"   : [NSNumber numberWithDouble:currentLocation.coordinate.longitude]
+        NSDictionary *response = @{ @"latitude"    : @(currentLocation.coordinate.latitude),
+                                    @"longitude"   : @(currentLocation.coordinate.longitude)
                                     };
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -271,8 +299,8 @@ NSString * const REGION_NAME_LIST_STORAGE_KEY = @"CDVGeofencing_REGION_NAME_LIST
 {
     if ([CLLocationManager locationServicesEnabled]) {
         CLLocation *currentLocation = [self.locationManager location];
-        return @{ @"latitude"    : [NSNumber numberWithDouble:currentLocation.coordinate.latitude],
-                  @"longitude"   : [NSNumber numberWithDouble:currentLocation.coordinate.longitude]
+        return @{ @"latitude"    : @(currentLocation.coordinate.latitude),
+                  @"longitude"   : @(currentLocation.coordinate.longitude)
                 };
     } else {
         return nil;
@@ -289,12 +317,9 @@ NSString *callback;
     serviceWorker.context[@"respondToTest"] = ^(JSValue *message) {
         NSString *response = [message toString];
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:response];
-        [result setKeepCallback:[NSNumber numberWithBool:YES]];
+        [result setKeepCallback:@(YES)];
         [weakSelf.commandDelegate sendPluginResult:result callbackId:callback];
     };
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
-    [result setKeepCallback:[NSNumber numberWithBool:YES]];
-    [self.commandDelegate sendPluginResult:result callbackId:callback];
 }
 
 @end
