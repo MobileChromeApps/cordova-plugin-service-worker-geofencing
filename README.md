@@ -8,8 +8,14 @@ Cordova service worker is currently limited to iOS
 ##Installation
 To add the plugin to your project, use this cli command from within your project
 ```
-cordova plugin add https://github.com/imintz/cordova-plugin-geofencing.git
+cordova plugin add https://github.com/MobileChromeApps/cordova-plugin-geofencing.git
 ```
+
+or, to install from npm:
+```
+cordova plugin add cordova-plugin-geofencing
+```
+
 To remove the plugin use
 ```
 cordova plugin rm cordova-plugin-geofencing
@@ -39,13 +45,12 @@ self.ongeofenceleave = function(event) {
 };
 ```
 ###Sample App
-To see this plugin in action, run the following commands to create the [sample app](https://github.com/imintz/cordova-plugin-geofencing/tree/master/test)
+To see this plugin in action, run the following commands to create the [sample app](https://github.com/MobileChromeApps/cordova-plugin-geofencing/tree/master/test)
 ```bash
 cordova create GeofenceDemo io.cordova.geofencedemo GeofenceDemo
 cd GeofenceDemo
 cordova platform add ios
-cordova plugin add https://github.com/mwoghiren/cordova-plugin-serviceworker.git
-cordova plugin add https://github.com/imintz/cordova-plugin-geofencing.git
+cordova plugin add cordova-plugin-geofencing
 mv 'plugins/cordova-plugin-geofencing/sample/config.xml' 'config.xml'
 mv 'plugins/cordova-plugin-geofencing/sample/sw.js' 'www/sw.js'
 mv 'plugins/cordova-plugin-geofencing/sample/index.html' 'www/index.html'
