@@ -33,7 +33,7 @@ function Geofence(id, name, lat, lon, radius) {
 Geofence.prototype.remove = function() {
     var scopeId = this.id;
     return new Promise(function(resolve, reject) {
-	exec(resolve, reject, "Geofencing", "unregister", [scopeId]);
+	exec(resolve, reject, 'Geofencing', 'unregister', [scopeId]);
     });
 };
 

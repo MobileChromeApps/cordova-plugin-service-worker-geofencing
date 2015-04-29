@@ -31,13 +31,13 @@ GeofenceManager.prototype.add = function(region, options) {
 	    resolve(new Geofence(id, region.name, region.center.latitude, region.center.longitude, region.radius));
 	};
 	var failure = function(err) {
-	    if (err === "PermissionDeniedError") {
+	    if (err === 'PermissionDeniedError') {
 		reject(new DOMException(err));
 	    } else {
 		reject(new Error(err));
 	    }
 	};
-	exec(success, failure, "Geofencing", "registerRegion", [region]);
+	exec(success, failure, 'Geofencing', 'registerRegion', [region]);
     });
 };
 
@@ -47,9 +47,9 @@ GeofenceManager.prototype.getAll = function(options) {
 	    resolve(regs.map(nativeToJSGeofence));
 	};
 	if (options && options.name) {
-	    exec(success, reject, "Geofencing", "getRegistrations", [options.name]);
+	    exec(success, reject, 'Geofencing', 'getRegistrations', [options.name]);
 	} else {
-	    exec(success, reject, "Geofencing", "getRegistrations", []);
+	    exec(success, reject, 'Geofencing', 'getRegistrations', []);
 	}
     });
 };
@@ -62,13 +62,13 @@ GeofenceManager.prototype.getById = function(id) {
 	function failure() {
 	    resolve(null);
 	}
-	exec(success, failure, "Geofencing", "getRegistration", [id]);
+	exec(success, failure, 'Geofencing', 'getRegistration', [id]);
     });
 };
 
 navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
     serviceWorkerRegistration.geofencing = new GeofenceManager();
-    exec(null, null, "Geofencing", "setupLocationManager", []);
+    exec(null, null, 'Geofencing', 'setupLocationManager', []);
 });
 
 module.exports = GeofenceManager;

@@ -19,6 +19,9 @@ To remove the plugin use
 ```
 cordova plugin rm cordova-plugin-geofencing
 ```
+
+Note: For this plugin to work properly, you must first install the cordova [service worker plugin](https://github.com/MobileChromeApps/cordova-plugin-service-worker) before installing the geofencing plugin.
+
 ##Example Usage
 On your active page:
 ```javascript
@@ -59,3 +62,5 @@ cordova prepare
 
 Enter a name into the input box and click "Create Geofence at Current Location" to do just that. The messages box will inform you whenever you enter or exit one of the geofences you created.
 
+##1.0.0 (April 29, 2015)
+* Initial release
