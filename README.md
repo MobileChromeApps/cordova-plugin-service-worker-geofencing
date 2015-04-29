@@ -1,8 +1,8 @@
 #Geofencing Plugin for Cordova Service Worker
-The cordova geofencing plugin enables developers to set up set up region monitoring and handle boundary crossing events with a service worker. Regions persist even when the app is quit and are monitored even when your app is in the background.
+The cordova geofencing plugin enables developers to set up set up region monitoring and handle boundary crossing events with a service worker. Regions persist even when the app is quit and are monitored even when your app is in the background. Check out [this spec](https://w3c.github.io/geofencing-api/) for a full reference of the Service Worker Geofencing API.
 
 ##Supported Platforms
-This plugin is currently supported on iOS only.
+- iOS
 
 ##Installation
 To add the plugin to your project, use this cli command from within your project
