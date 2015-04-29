@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
 	   id="cordova-plugin-geofencing"
-      version="1.0.0">
+      version="1.0.1-dev">
     <name>Geofencing</name>
     <description>Geofencing plugin for cordova service worker</description>
     <license>Apache 2.0</license>
