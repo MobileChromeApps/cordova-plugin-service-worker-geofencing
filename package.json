@@ -1,16 +1,16 @@
 {
-  "name": "cordova-plugin-geofencing",
+  "name": "cordova-plugin-service-worker-geofencing",
   "version": "1.0.0",
-  "description": "Geofencing plugin for cordova service worker",
+  "description": "Geofencing plugin for Cordova Service Worker",
   "cordova": {
-    "id": "cordova-plugin-geofencing",
+    "id": "cordova-plugin-service-worker-geofencing",
     "platforms": [
       "ios"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MobileChromeApps/cordova-plugin-geofencing.git"
+    "url": "git+https://github.com/MobileChromeApps/cordova-plugin-service-worker-geofencing.git"
   },
   "keywords": [
     "cordova",
@@ -21,7 +21,7 @@
   "author": "The Chrome Team",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/MobileChromeApps/cordova-plugin-geofencing/issues"
+    "url": "https://github.com/MobileChromeApps/cordova-plugin-service-worker-geofencing/issues"
   },
-  "homepage": "https://github.com/MobileChromeApps/cordova-plugin-geofencing#readme"
+  "homepage": "https://github.com/MobileChromeApps/cordova-plugin-service-worker-geofencing#readme"
 }

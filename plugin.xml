@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-	   id="cordova-plugin-geofencing"
+	   id="cordova-plugin-service-worker-geofencing"
       version="1.0.0">
     <name>Geofencing</name>
     <description>Geofencing plugin for cordova service worker</description>
     <license>Apache 2.0</license>
     <keywords>cordova,geofencing</keywords>
 
-    <dependency id="cordova-plugin-service-worker" url="https://github.com/MobileChromeApps/cordova-plugin-service-worker.git" />
-    <dependency id="cordova-plugin-geolocation" url="https://github.com/apache/cordova-plugin-geolocation.git" />
+    <dependency id="cordova-plugin-service-worker" />
+    <dependency id="cordova-plugin-geolocation" />
 
     <js-module src="www/GeofenceManager.js" name="GeofenceManager">
 	<clobbers target="GeofenceManager" />
