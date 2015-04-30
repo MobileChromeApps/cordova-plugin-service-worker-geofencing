@@ -7,17 +7,17 @@ The cordova geofencing plugin enables developers to set up set up region monitor
 ## Installation
 To add the plugin to your project, use this cli command from within your project
 ```
-cordova plugin add https://github.com/MobileChromeApps/cordova-plugin-geofencing.git
+cordova plugin add https://github.com/MobileChromeApps/cordova-plugin-service-worker-geofencing.git
 ```
 
 or, to install from npm:
 ```
-cordova plugin add cordova-plugin-geofencing
+cordova plugin add cordova-plugin-service-worker-geofencing
 ```
 
 To remove the plugin use
 ```
-cordova plugin rm cordova-plugin-geofencing
+cordova plugin rm cordova-plugin-service-worker-geofencing
 ```
 
 Note: For this plugin to work properly, you must first install the cordova [service worker plugin](https://github.com/MobileChromeApps/cordova-plugin-service-worker) before installing the geofencing plugin.
@@ -47,12 +47,12 @@ self.ongeofenceleave = function(event) {
 };
 ```
 ### Sample App
-To see this plugin in action, run the following commands to create the [sample app](https://github.com/MobileChromeApps/cordova-plugin-geofencing/tree/master/test)
+To see this plugin in action, run the following commands to create the [sample app](https://github.com/MobileChromeApps/cordova-plugin-service-worker-geofencing/tree/master/test)
 ```bash
 cordova create GeofenceDemo io.cordova.geofencedemo GeofenceDemo
 cd GeofenceDemo
 cordova platform add ios
-cordova plugin add cordova-plugin-geofencing
+cordova plugin add cordova-plugin-service-worker-geofencing
 mv 'plugins/cordova-plugin-service-worker-geofencing/sample/config.xml' 'config.xml'
 mv 'plugins/cordova-plugin-service-worker-geofencing/sample/sw.js' 'www/sw.js'
 mv 'plugins/cordova-plugin-service-worker-geofencing/sample/index.html' 'www/index.html'
